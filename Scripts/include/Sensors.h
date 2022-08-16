@@ -19,14 +19,17 @@
 
 extern portMUX_TYPE synch;
 extern portMUX_TYPE timerMux;
-extern int pulseCount;
+extern volatile int pulseCount;
 extern unsigned long totalMilliLitres; 
+
+extern DallasTemperature sensors;
+
 
 
 // decleration of the functions used for data acquisition from sesnors
 
 void SetupTempSensor();
-float GetTemp(DallasTemperature sensors);
+float GetTemp();
 float GetpH();
 float GetTurb();
 void IRAM_ATTR GetFlow();

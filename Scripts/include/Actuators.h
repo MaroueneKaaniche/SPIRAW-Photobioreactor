@@ -17,7 +17,6 @@
 #define MotorA 10
 #define MotorB 11
 
-
 // decleration of the functions used to manipulate actuators
 
 void TurnOn(int PinName);

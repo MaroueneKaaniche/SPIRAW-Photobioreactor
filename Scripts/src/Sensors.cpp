@@ -2,7 +2,7 @@
 
 // acquiring temprature value from sensor using the dallas temperature library
 
-float GetTemp(DallasTemperature sensors)
+float GetTemp()
 {
     //add sensors.begin() in setup() -> main.cpp
     sensors.requestTemperatures(); 
@@ -26,7 +26,7 @@ float GetTurb()
         ntu = -1120.4*(volt*volt)+5742.3*volt-4353.8;  //Y = -1120.4x2 + 5742.3x – 4352.9 with Y is the turbidity and X is the voltage
         }
     return(ntu);
-}
+    }
 
 // acquiring pH level 
 
