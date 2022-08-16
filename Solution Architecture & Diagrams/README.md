@@ -1,5 +1,5 @@
 # Solution Architecture & Diagrams 
 
-We recommend using draw.io as tool for drawing sketching your project diagrams. Draw.io support saving your file in JSON or XML format.
-
-https://draw.io
+Project software and hardware architecture done using Miro 
+link : 
+https://miro.com/welcomeonboard/QWt6RWRDSk9Ga2VCMzNnZVdYRkRMMlRINTVXMUc4Q3p6QWRxeDlYUzhGNFQxVGxaYlNzcHpISE1KYkNEbUk1cXwzNDU4NzY0NTMwMDcyNDU2NDAz?share_link_id=207910195072
