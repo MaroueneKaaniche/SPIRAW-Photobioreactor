@@ -25,19 +25,18 @@ float GetTurb()
         }else{
         ntu = -1120.4*(volt*volt)+5742.3*volt-4353.8;  //Y = -1120.4x2 + 5742.3x – 4352.9 with Y is the turbidity and X is the voltage
         }
-    return(ntu);
+    return(ntu);                                       //we can easily get the biomass given that 1NTU = 1 mg/L
     }
 
 // acquiring pH level 
 
-float calibration_value=21.34;                          // we alter this variable by using solution whose PH value is 7 and adding the difference (7-reading) to it
-int phval = 0; 
-int buffer_arr[10],temp;
-unsigned long int avgval; 
-
 
 float GetpH()
 {
+    float calibration_value=21.34;                          // we alter this variable by using solution whose PH value is 7 and adding the difference (7-reading) to it
+    int phval = 0; 
+    int buffer_arr[10],temp;
+    unsigned long int avgval; 
 
     for(int i=0;i<10;i++)                               // using the running average method
     { 

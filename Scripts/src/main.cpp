@@ -1,6 +1,9 @@
 #include <Arduino.h>
 #include "Actuators.h"
 #include "Sensors.h"
+
+
+
 #define DEBUG
 // variables used to synchronize between main loop and the ISR when modifying a shared variable
 
@@ -21,16 +24,15 @@ DallasTemperature sensors(&oneWire);
 
 volatile int pulseCount;
 unsigned long totalMilliLitres; 
-float testTemp;
+float testTurb;
 
 void setup() {
   Serial.begin(9600);
   
   //launching sensor instance
-  sensors.begin();
-
+  sensors.begin();    
   //external interrupts on flowPin 
- // attachInterrupt(FlowPin, pulseCounter, RISING);
+  //attachInterrupt(FlowPin, pulseCounter, RISING);
   
   //timer interrupts every 1 second
   //timer = timerBegin(0, 80, true);
@@ -41,10 +43,10 @@ void setup() {
 }
 
 void loop() {
-  testTemp=GetTemp();
+  testTurb=GetTurb();
   #ifdef DEBUG
-    Serial.print("temp is :");
-    Serial.println(testTemp);
+    Serial.print("Turb is :");
+    Serial.println(testTurb);
   #endif
-  delay(1000);
+
 }
