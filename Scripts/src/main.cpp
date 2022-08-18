@@ -27,7 +27,7 @@ DallasTemperature sensors(&oneWire);
 //flowRate variables 
 volatile int pulseCount;
 unsigned long totalMilliLitres; 
-float testTurb;
+
 
 //state machine variables 
 enum states {                         // Define enumerated type for state machine states
@@ -119,10 +119,8 @@ void setup() {
 }
 
 void loop() {
-  testTurb=GetTurb();
   #ifdef DEBUG
-    DebugSerial.print("Turb is :");
-    DebugSerial.println(testTurb);
+    DebugSerial.print("Debug msg");
   #endif
 
 }
