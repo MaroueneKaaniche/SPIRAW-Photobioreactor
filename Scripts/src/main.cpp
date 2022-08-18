@@ -42,6 +42,36 @@ void setup() {
   timerAlarmEnable(timer);    
 
 
+  //Creation of diffrent tasks used in the system 
+  
+  xTaskCreatePinnedToCore(  // Use xTaskCreate() in vanilla FreeRTOS
+              SystemControl,  // Function to be called
+              "SystemControl",   // Name of task
+              4096,         // Stack size (bytes in ESP32, words in FreeRTOS)
+              NULL,         // Parameter to pass to function
+              1,            // Task priority (0 to configMAX_PRIORITIES - 1)
+              NULL,         // Task handle
+              1);     // Run on one core for demo purposes (ESP32 only)
+
+  xTaskCreatePinnedToCore(  // Use xTaskCreate() in vanilla FreeRTOS
+              Display,  // Function to be called
+              "SystemDisplay",   // Name of task
+              2048,         // Stack size (bytes in ESP32, words in FreeRTOS)
+              NULL,         // Parameter to pass to function
+              1,            // Task priority (0 to configMAX_PRIORITIES - 1)
+              NULL,         // Task handle
+              1);     // Run on one core for demo purposes (ESP32 only)
+
+  xTaskCreatePinnedToCore(  // Use xTaskCreate() in vanilla FreeRTOS
+              WirlessCommunication,  // Function to be called
+              "WirlessCommunication",   // Name of task
+              2048,         // Stack size (bytes in ESP32, words in FreeRTOS)
+              NULL,         // Parameter to pass to function
+              1,            // Task priority (0 to configMAX_PRIORITIES - 1)
+              NULL,         // Task handle
+              1);     // Run on one core for demo purposes (ESP32 only)
+
+
 }
 
 void loop() {
