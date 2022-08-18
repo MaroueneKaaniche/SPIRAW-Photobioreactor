@@ -27,7 +27,3 @@ void StopMotor(){
     digitalWrite(MotorB, LOW);
 }
 
-void SystemControl(void *parameter) {
-  while(1) {
-  }
-}

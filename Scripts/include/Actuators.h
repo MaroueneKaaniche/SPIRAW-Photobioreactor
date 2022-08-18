@@ -23,5 +23,4 @@ void TurnOn(int PinName);
 void TurnOff(int PinName);
 void TurnMotor(int speed, int direction);
 void StopMotor();
-void SystemControl(void *parameter);
 #endif
