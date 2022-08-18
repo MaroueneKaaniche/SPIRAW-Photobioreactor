@@ -1,7 +1,8 @@
 #include <Arduino.h>
 #include "Actuators.h"
 #include "Sensors.h"
-
+#include "Wireless.h"
+#include "Display.h"
 
 
 #define DEBUG
@@ -32,13 +33,14 @@ void setup() {
   //launching sensor instance
   sensors.begin();    
   //external interrupts on flowPin 
-  //attachInterrupt(FlowPin, pulseCounter, RISING);
+  attachInterrupt(FlowPin, pulseCounter, RISING);
   
   //timer interrupts every 1 second
-  //timer = timerBegin(0, 80, true);
-  //timerAttachInterrupt(timer, GetFlow, true);
-  //timerAlarmWrite(timer, 1000000, true);
-  //timerAlarmEnable(timer);    
+  timer = timerBegin(0, 80, true);
+  timerAttachInterrupt(timer, GetFlow, true);
+  timerAlarmWrite(timer, 1000000, true);
+  timerAlarmEnable(timer);    
+
 
 }
 

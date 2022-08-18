@@ -26,3 +26,8 @@ void StopMotor(){
     digitalWrite(MotorA, LOW);
     digitalWrite(MotorB, LOW);
 }
+
+void SystemControl(void *parameter) {
+  while(1) {
+  }
+}

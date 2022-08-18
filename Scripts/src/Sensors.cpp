@@ -81,3 +81,4 @@ void IRAM_ATTR GetFlow()
   pulseCount=0;
   portEXIT_CRITICAL_ISR(&timerMux);
 }
+
