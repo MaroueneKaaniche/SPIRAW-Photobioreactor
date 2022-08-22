@@ -30,16 +30,19 @@ volatile int pulseCount;
 unsigned long totalMilliLitres; 
 unsigned long currentTime=millis();
 int TimeForLights=12000;
+int TimeForCleanup=12000;
 float Temperature,pH,Turbidity,Flow;
 float Xvalue;      //Turbidity threshhold
 float Yvalue;      //Flowrate threshhold      
 boolean cuurentState;
+
 //state machine variables 
 enum states {                         // Define enumerated type for state machine states
   START, 
   INITIAL, 
   PRINCIPAL,
-  TERMINAL 
+  TERMINAL,
+  START2 
 };
 states state;                         // Global variable to store current state
 
@@ -51,6 +54,9 @@ typedef struct message {
 static const int msg_queue_len = 5;     // Size of msg_queue
 static QueueHandle_t msg_queue;         //handle of a queue 
 
+// mutex
+static SemaphoreHandle_t advanceToNextState;
+
 // function for system control, to be called in the system control task 
 void SystemControl(void *parameter) {
   message msg;
@@ -60,62 +66,81 @@ void SystemControl(void *parameter) {
       case START:                     // upon system start, it awaits for the user to instruct the beginnig of cycle
         break;
       case INITIAL:                   
-        TurnOn(MicroPumpPin);
-        TurnOn(UVLightPin);
-        vTaskDelay(20000);
-        TurnOff(MicroPumpPin);
-        TurnOff(UVLightPin);
-        state=PRINCIPAL;
-        break;    
+          TurnOn(MicroPumpPin);
+          TurnOn(UVLightPin);
+          vTaskDelay(20000);
+          TurnOff(MicroPumpPin);
+          TurnOff(UVLightPin);
+          xQueueSend(msg_queue,(void *)&msg,10);
+          xSemaphoreTake(advanceToNextState, portMAX_DELAY);
+          state=PRINCIPAL;
+          break;    
       case PRINCIPAL:
-        TurnOn(AirPin);
-        TurnOn(LEDLightPin);
-        cuurentState=1;
-        while(msg.Turbidity!=Xvalue){
-          if((millis()-currentTime)>TimeForLights){
-            if(cuurentState){
-                TurnOff(LEDLightPin);
-                cuurentState=0;
+          TurnOn(AirPin);
+          TurnOn(LEDLightPin);
+          cuurentState=1;
+          while(msg.Turbidity!=Xvalue){
+            if((millis()-currentTime)>TimeForLights){
+              if(cuurentState){
+                  TurnOff(LEDLightPin);
+                  cuurentState=0;
+                  }
+              else{
+                TurnOn(LEDLightPin);
+                cuurentState=1;
                 }
-            else{
-              TurnOn(LEDLightPin);
-              cuurentState=1;
-              }
+            }
+            msg.Temperature=GetTemp();
+            msg.pH=GetpH();
+            msg.Turbidity=GetTurb();
+            xQueueSend(msg_queue, (void *)&msg , 10);
           }
-          msg.Temperature=GetTemp();
-          msg.pH=GetpH();
-          msg.Turbidity=GetTurb();
-          xQueueSend(msg_queue, (void *)&msg , 10);
-        }
-        TurnOff(LEDLightPin);
-        TurnOff(AirPin);
-        TurnOn(Vanne1);
-        TurnOn(Vanne2);
-        TurnOn(Vanne3);
-        TurnOn(Water1Pin);
-        TurnOn(Water2Pin);
-        TurnMotor(255,1);
-        while(msg.Flow!=Yvalue){
-          msg.Temperature=GetTemp();
-          msg.pH=GetpH();
-          msg.Turbidity=GetTurb();
-          msg.Flow=totalMilliLitres;
-          xQueueSend(msg_queue, (void *)&msg , 10);
-        }
-        TurnOff(Vanne1);
-        TurnOff(Vanne2);
-        TurnOff(Vanne3);
-        TurnOff(Water1Pin);
-        TurnOn(Water2Pin); 
-        StopMotor();
-        state=TERMINAL;       
-        break;    
+          TurnOff(LEDLightPin);
+          TurnOff(AirPin);
+          xSemaphoreTake(advanceToNextState, portMAX_DELAY);
+          TurnOn(Vanne1);
+          TurnOn(Vanne2);
+          TurnOn(Vanne3);
+          TurnOn(Water1Pin);
+          TurnOn(Water2Pin);
+          TurnMotor(255,1);
+          while(msg.Flow!=Yvalue){
+            msg.Temperature=GetTemp();
+            msg.pH=GetpH();
+            msg.Turbidity=GetTurb();
+            msg.Flow=totalMilliLitres;
+            xQueueSend(msg_queue, (void *)&msg , 10);
+          }
+          TurnOff(Vanne1);
+          TurnOff(Vanne2);
+          TurnOff(Vanne3);
+          TurnOff(Water1Pin);
+          TurnOn(Water2Pin); 
+          StopMotor();
+          state=TERMINAL;       
+          break;    
       case TERMINAL:           
-        TurnOff(Vanne1);
-        TurnOff(Vanne2);
-        TurnOff(Vanne3);
-        TurnOff(Water1Pin);
-        TurnOn(Water2Pin); 
+          TurnOn(Vanne1);
+          TurnOn(Vanne2);
+          TurnOn(Vanne3);
+          TurnOn(Water1Pin);
+          TurnOn(Water2Pin);
+          TurnMotor(255,1);
+          vTaskDelay(TimeForCleanup);
+          TurnOff(Vanne1);
+          TurnOff(Vanne2);
+          TurnOff(Vanne3);
+          TurnOff(Water1Pin);
+          TurnOn(Water2Pin); 
+          StopMotor();
+          state=START2;                      
+          break;
+      case START2:
+          TurnOn(MicroPumpPin);
+          vTaskDelay(20000);
+          TurnOff(MicroPumpPin);
+          xSemaphoreTake(advanceToNextState, portMAX_DELAY);
+          state=PRINCIPAL;
           break;    
       }
   }
@@ -142,8 +167,11 @@ void setup() {
   msg_queue=xQueueCreate(msg_queue_len, sizeof(message));  // creating a queue for handling msgs between tasks
 
 
-  //Creation of diffrent tasks used in the system 
+  // Create mutex before starting tasks and yielding it before starting 
+  advanceToNextState= xSemaphoreCreateMutex();
+  xSemaphoreTake(advanceToNextState, portMAX_DELAY);
 
+  //Creation of diffrent tasks used in the system 
   xTaskCreatePinnedToCore(  // Use xTaskCreate() in vanilla FreeRTOS
               SystemControl,  // Function to be called
               "SystemControl",   // Name of task
