@@ -111,7 +111,11 @@ void SystemControl(void *parameter) {
         state=TERMINAL;       
         break;    
       case TERMINAL:           
-          //do something
+        TurnOff(Vanne1);
+        TurnOff(Vanne2);
+        TurnOff(Vanne3);
+        TurnOff(Water1Pin);
+        TurnOn(Water2Pin); 
           break;    
       }
   }
