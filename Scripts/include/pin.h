@@ -16,7 +16,8 @@
 #define Vanne5 9
 #define MotorA 10
 #define MotorB 11
-
+#define UVLightPin 12
+#define LEDLightPin 13
 //Display pins
 #define RX GPIO_NUM_16
 #define TX GPIO_NUM_17

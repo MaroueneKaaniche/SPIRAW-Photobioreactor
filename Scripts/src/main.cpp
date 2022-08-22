@@ -3,6 +3,7 @@
 #include "Sensors.h"
 #include "Wireless.h"
 #include "Display.h"
+#include "pin.h"
 
 #define DebugSerial Serial // serial port used for DEBUG
 
@@ -11,7 +12,7 @@
 #define TIMER 0
 #define DEVIDE 80
 #define ALARM 1000000
-
+#define Baudrate 9600
 // variables used to synchronize between main loop and the ISR when modifying a shared variable
 portMUX_TYPE synch = portMUX_INITIALIZER_UNLOCKED;
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
@@ -24,11 +25,15 @@ OneWire oneWire(TempPin);
 DallasTemperature sensors(&oneWire);
 
 
-//flowRate variables 
+//sensor variables 
 volatile int pulseCount;
 unsigned long totalMilliLitres; 
-
-
+unsigned long currentTime=millis();
+int TimeForLights=12000;
+float Temperature,pH,Turbidity,Flow;
+float Xvalue;      //Turbidity threshhold
+float Yvalue;      //Flowrate threshhold      
+boolean cuurentState;
 //state machine variables 
 enum states {                         // Define enumerated type for state machine states
   START, 
@@ -39,35 +44,82 @@ enum states {                         // Define enumerated type for state machin
 states state;                         // Global variable to store current state
 
 // Queue variables 
-typedef struct msg {      
-  char body[20];
-  int count;
-} msg;
+typedef struct message {      
+    float Temperature,pH,Turbidity;
+    unsigned long Flow;
+} message;
 static const int msg_queue_len = 5;     // Size of msg_queue
 static QueueHandle_t msg_queue;         //handle of a queue 
 
 // function for system control, to be called in the system control task 
 void SystemControl(void *parameter) {
-  switch (state) {
-    case START:                     // upon system start, it awaits for the user to instruct the beginnig of cycle
-        //do something
-        break;  
-    case INITIAL:                   
-        //do something
+  message msg;
+  msg.Flow=0;
+  while(1){  
+    switch (state) {
+      case START:                     // upon system start, it awaits for the user to instruct the beginnig of cycle
+        break;
+      case INITIAL:                   
+        TurnOn(MicroPumpPin);
+        TurnOn(UVLightPin);
+        vTaskDelay(20000);
+        TurnOff(MicroPumpPin);
+        TurnOff(UVLightPin);
+        state=PRINCIPAL;
         break;    
-    case PRINCIPAL:
-        //do something
+      case PRINCIPAL:
+        TurnOn(AirPin);
+        TurnOn(LEDLightPin);
+        cuurentState=1;
+        while(msg.Turbidity!=Xvalue){
+          if((millis()-currentTime)>TimeForLights){
+            if(cuurentState){
+                TurnOff(LEDLightPin);
+                cuurentState=0;
+                }
+            else{
+              TurnOn(LEDLightPin);
+              cuurentState=1;
+              }
+          }
+          msg.Temperature=GetTemp();
+          msg.pH=GetpH();
+          msg.Turbidity=GetTurb();
+          xQueueSend(msg_queue, (void *)&msg , 10);
+        }
+        TurnOff(LEDLightPin);
+        TurnOff(AirPin);
+        TurnOn(Vanne1);
+        TurnOn(Vanne2);
+        TurnOn(Vanne3);
+        TurnOn(Water1Pin);
+        TurnOn(Water2Pin);
+        TurnMotor(255,1);
+        while(msg.Flow!=Yvalue){
+          msg.Temperature=GetTemp();
+          msg.pH=GetpH();
+          msg.Turbidity=GetTurb();
+          msg.Flow=totalMilliLitres;
+          xQueueSend(msg_queue, (void *)&msg , 10);
+        }
+        TurnOff(Vanne1);
+        TurnOff(Vanne2);
+        TurnOff(Vanne3);
+        TurnOff(Water1Pin);
+        TurnOn(Water2Pin); 
+        StopMotor();
+        state=TERMINAL;       
         break;    
-    case TERMINAL:           
-        //do something
-        break;    
+      case TERMINAL:           
+          //do something
+          break;    
+      }
   }
 }
 
-
 void setup() {
   #ifdef DEBUG
-    DebugSerial.begin(9600);   //lfouuuk
+    DebugSerial.begin(Baudrate);   
   #endif
   //launching sensor instance
   sensors.begin();    
@@ -75,15 +127,15 @@ void setup() {
   attachInterrupt(FlowPin, pulseCounter, RISING);
   
   //timer interrupts every 1 second
-  timer = timerBegin(TIMER, DEVIDE, true);  // define lfouk 
+  timer = timerBegin(TIMER, DEVIDE, true);  
   timerAttachInterrupt(timer, GetFlow, true);
-  timerAlarmWrite(timer, ALARM, true);      // kif kif
+  timerAlarmWrite(timer, ALARM, true);      
   timerAlarmEnable(timer);    
   
 
   state=START;    //When starting the ESP, the system is at start state and waiting to begin  
 
-  msg_queue=xQueueCreate(msg_queue_len, sizeof(msg));  // creating a queue for handling msgs between tasks
+  msg_queue=xQueueCreate(msg_queue_len, sizeof(message));  // creating a queue for handling msgs between tasks
 
 
   //Creation of diffrent tasks used in the system 
