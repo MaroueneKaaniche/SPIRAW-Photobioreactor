@@ -50,6 +50,7 @@ states state;                         // Global variable to store current state
 typedef struct message {      
     float Temperature,pH,Turbidity;
     unsigned long Flow;
+    boolean intialDone,CultureDone,TerminalDone, Start2Done=0;
 } message;
 static const int msg_queue_len = 5;     // Size of msg_queue
 static QueueHandle_t msg_queue;         //handle of a queue 
@@ -64,13 +65,16 @@ void SystemControl(void *parameter) {
   while(1){  
     switch (state) {
       case START:                     // upon system start, it awaits for the user to instruct the beginnig of cycle
-        break;
+          xSemaphoreTake(advanceToNextState, portMAX_DELAY);
+          state=INITIAL;        
+          break;
       case INITIAL:                   
           TurnOn(MicroPumpPin);
           TurnOn(UVLightPin);
           vTaskDelay(20000);
           TurnOff(MicroPumpPin);
           TurnOff(UVLightPin);
+          msg.intialDone=1;
           xQueueSend(msg_queue,(void *)&msg,10);
           xSemaphoreTake(advanceToNextState, portMAX_DELAY);
           state=PRINCIPAL;
@@ -97,6 +101,8 @@ void SystemControl(void *parameter) {
           }
           TurnOff(LEDLightPin);
           TurnOff(AirPin);
+          msg.CultureDone=1;
+          xQueueSend(msg_queue,(void *)&msg,10);
           xSemaphoreTake(advanceToNextState, portMAX_DELAY);
           TurnOn(Vanne1);
           TurnOn(Vanne2);
@@ -133,12 +139,15 @@ void SystemControl(void *parameter) {
           TurnOff(Water1Pin);
           TurnOn(Water2Pin); 
           StopMotor();
+          msg.TerminalDone=1;
+          xQueueSend(msg_queue,(void *)&msg,10);
           state=START2;                      
           break;
       case START2:
           TurnOn(MicroPumpPin);
           vTaskDelay(20000);
           TurnOff(MicroPumpPin);
+          msg.Start2Done=1;
           xSemaphoreTake(advanceToNextState, portMAX_DELAY);
           state=PRINCIPAL;
           break;    
