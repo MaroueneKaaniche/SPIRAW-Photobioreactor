@@ -45,11 +45,6 @@ To get started with the Spirulina Harvesting System, follow these steps:
 
 For in-depth setup instructions, refer to the [Setup Guide](setup_guide.md).
 
-## Contributors
-
-This project was made possible by the collaborative efforts of the following contributors:
-
-- John Doe ([@johndoe](https://github.com/johndoe))
 
 ## License
 
@@ -57,4 +52,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 Feel free to explore the repository, contribute, and adapt the system to your requirements!
 
-For any questions or inquiries, please contact us at spirulina.harvest@example.com.
+For any questions or inquiries, please contact us at marouene.kaaniche@insat.ucar.tn
