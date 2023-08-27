@@ -43,9 +43,6 @@ To get started with the Spirulina Harvesting System, follow these steps:
 3. Install the accompanying mobile app on your smartphone.
 4. Configure the MQTT settings in the app to establish communication with the system.
 
-For in-depth setup instructions, refer to the [Setup Guide](setup_guide.md).
-
-
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
