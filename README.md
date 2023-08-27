@@ -33,7 +33,7 @@ The system communicates with users through a mobile app using MQTT (Message Queu
 - Actuator Control: Remotely manage actuators responsible for maintaining optimal growth conditions.
 - Harvesting Notifications: Get notified when the system enters the harvesting phase and receive detailed reports.
 
-![Architecture Image]([architecture_image.jpg](https://github.com/MaroueneKaaniche/SPIRAW-Photobioreactor/blob/master/Solution%20Architecture%20%26%20Diagrams/Architecture%20software.jpg)) <!-- Insert Image: Diagram depicting the software architecture -->
+![Architecture Image](https://github.com/MaroueneKaaniche/SPIRAW-Photobioreactor/blob/master/Solution%20Architecture%20%26%20Diagrams/Architecture%20software.jpg)
 
 ## Getting Started
 
