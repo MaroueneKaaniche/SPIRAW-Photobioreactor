@@ -14,7 +14,7 @@ The hardware implementation is divided into three distinct phases:
 2. **Phase Two:** Growth Monitoring and Regulation
 3. **Phase Three:** Harvesting and Data Reporting
 
-![Phases Image]((https://github.com/MaroueneKaaniche/SPIRAW-Photobioreactor/blob/master/Solution%20Architecture%20%26%20Diagrams/Architecture%20hardware.jpg)) <!-- Insert Image: Representation of project phases -->
+![Phases Image](https://github.com/MaroueneKaaniche/SPIRAW-Photobioreactor/blob/master/Solution%20Architecture%20%26%20Diagrams/Architecture%20hardware.jpg) 
 
 ## Software Architecture
 
