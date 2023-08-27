@@ -1,6 +1,6 @@
 # Spirulina Harvesting System using ESP32
 
-![Project Image](project_image.jpg) <!-- Insert Image: Schematic or representation of the project setup -->
+![Project Image](https://github.com/MaroueneKaaniche/SPIRAW-Photobioreactor/blob/master/Solution%20Architecture%20%26%20Diagrams/project%20image.jpeg) 
 
 ## Overview
 
